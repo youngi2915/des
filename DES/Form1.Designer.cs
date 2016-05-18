@@ -33,6 +33,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
+            this.textBox4 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // textBox1
@@ -81,11 +82,21 @@
             this.textBox3.Size = new System.Drawing.Size(345, 97);
             this.textBox3.TabIndex = 4;
             // 
+            // textBox4
+            // 
+            this.textBox4.Location = new System.Drawing.Point(12, 253);
+            this.textBox4.Multiline = true;
+            this.textBox4.Name = "textBox4";
+            this.textBox4.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox4.Size = new System.Drawing.Size(345, 97);
+            this.textBox4.TabIndex = 4;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 431);
+            this.ClientSize = new System.Drawing.Size(484, 363);
+            this.Controls.Add(this.textBox4);
             this.Controls.Add(this.textBox3);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.label1);
@@ -106,11 +117,12 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox textBox1;
+        public System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox textBox4;
     }
 }
 
