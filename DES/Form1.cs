@@ -116,12 +116,14 @@ namespace DES
 
         private static bool encoded;
 
-        public DES()
+        private static void Key_arrays()
         {
             for (int i = 0; i < 16; i++)
-                Keys[i] = new byte[6];
+            {
+                Keys[i]=new byte[6];
+            }
         }
-
+    
         public void Set_encoded(bool input)
         {
             encoded = input;
@@ -326,6 +328,8 @@ namespace DES
             BitArray after_parity_drop_56 = new BitArray(56, false);
             int before = 0;
 
+            Key_arrays();
+
             //Debug.WriteLine("input_64.Length = " + input_64.Length);
 
             //for (int k = 0; k < Key_Input.Length; k++)
@@ -500,7 +504,7 @@ namespace DES
             //if (round_count == 15) return result;
 
             //Swapper
-            if (round_count == 16)
+            if (round_count == 15)
             {
                 for (int i = 0; i < 32; i++)
                 {
