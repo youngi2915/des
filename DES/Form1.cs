@@ -36,10 +36,23 @@ namespace DES
                 Input_file.Write(data, 0, data.Length);
                 Input_file.Close();
 
+                byte[] Key = new byte[8];
+
+                if(string.IsNullOrWhiteSpace(textBox2.Text))    //Key가 입력되지 않음
+                {
+                    return;
+                }
+
+                else
+                {
+                    
+                    Key = Encoding.Default.GetBytes(textBox2.Text);
+                }
+
                 //암호화
                 //Debug.WriteLine("암호화 진행");
                 DES des = new DES();
-                des.Encryption();
+                des.Encryption(Key);
 
                 textBox3.Text = "평문 암호화";
                 //암호문을 파일에서 읽어와 암호문 textBox에 출력
@@ -59,13 +72,21 @@ namespace DES
         private int[,] S_Box = { { 14, 04, 13, 01, 02, 15, 11, 08, 03, 10, 06, 12, 05, 09, 00, 07 }, { 00, 15, 07, 04, 14, 02, 13, 10, 03, 06, 12, 11, 09, 05, 03, 08 }, { 04, 01, 14, 08, 13, 06, 02, 11, 15, 12, 09, 07, 03, 10, 05, 00 }, { 15, 12, 08, 02, 04, 09, 01, 07, 05, 11, 03, 14, 10, 00, 06, 13 } };
         private int[] Expansion_P_Box = { 32, 01, 02, 03, 04, 05, 04, 05, 06, 07, 08, 09, 08, 09, 10, 11, 12, 13, 12, 13, 14, 15, 16, 17, 16, 17, 18, 19, 20, 21, 20, 21, 22, 23, 23, 25, 24, 25, 26, 27, 28, 29, 28, 29, 31, 31, 32, 01};
         private int[] Straight_P_Box = { 16, 07, 20, 21, 29, 12, 28, 17, 01, 15, 23, 26, 05, 18, 31, 10, 02, 08, 24, 14, 32, 27, 03, 09, 19, 13, 30, 06, 22, 11, 04, 25 };
+        private int[] Parity_Drop = { 57, 49, 41, 33, 25, 17, 09, 01, 58, 50, 42, 34, 26, 18, 10, 02, 59, 51, 43, 35, 27, 19, 11, 03, 60, 52, 44, 36, 63, 55, 47, 39, 31, 23, 15, 07, 62, 54, 46, 38, 30, 22, 14, 06, 61, 53, 45, 37, 29, 21, 13, 05, 28, 20, 12, 04};
 
-        private int round_count;
+        //private BitArray[] Keys=new BitArray[16];
+
+        private byte[,] Keys=new byte[16, 8];
+
+        //private int round_count;
 
         private int how_long;
 
-        public void Encryption()
+        public void Encryption(byte[] KeyInput)
         {
+            //1~16 Round Key Generate
+            Key_Generate(KeyInput);
+
             //입력파일 열어서 읽기
             FileStream Input = new FileStream("input.txt", FileMode.Open, FileAccess.Read);
             byte[] data = new byte[Input.Length];
@@ -79,7 +100,7 @@ namespace DES
             //암호화 한 결과 txt를 저장할 파일 스트림
             FileStream Output = new FileStream("output.txt", FileMode.Create, FileAccess.Write);
             Output.Seek(0, SeekOrigin.Begin);
-
+            
             byte[] byte_8;
 
             for(int i=0; i<=how_long; i++)
@@ -99,10 +120,10 @@ namespace DES
                     int rest = data.Length - 8 * how_long;
                     if (rest == 0)
                     {
-                        //Input.Close();
-                        //Output.Close();
-                        //return;
-                        continue;
+                        Input.Close();
+                        Output.Close();
+                        return;
+                        //continue;
                     }
                     for(int j=0; j<rest; j++)
                     {
@@ -148,10 +169,33 @@ namespace DES
             return;
         }
 
+        private void Key_Generate(byte[] Key_Input)
+        {
+            BitArray input_64 = new BitArray(Key_Input);
+            BitArray after_parity_drop_56 = new BitArray(56, false);
+            int before = 0;
+
+            //Debug.WriteLine("input_64.Length = " + input_64.Length);
+
+            //parity drop
+            for (int i = 0; i < 56; i++ )
+            {
+                before = Parity_Drop[i];
+
+                Debug.WriteLine("i = " + i + ", (before-1) = " + (before - 1));
+                //after_parity_drop_56.Set(i, input_64.Get(before - 1));
+                after_parity_drop_56[i]
+            }
+
+
+            return;
+        }
+
         private BitArray Parmutation(BitArray input, bool if_initial)   //초기 치환, 최종 치환
         {
             int[] parmu_array;
             BitArray result = new BitArray(64, false);
+            
             int before;
 
             if(if_initial)
@@ -245,7 +289,9 @@ namespace DES
             //S_Boxs (48bits to 32bits)
             for (int i = 0; i < 8; i++ )
             {
+                Debug.WriteLine("temp3[0] = " + temp3[0] + ", temp[" + 6 * i + "] = " + temp[6 * i]);
                 temp3[0] = temp[6 * i];
+                Debug.WriteLine("temp3[0] = " + temp3[0] + ", temp[" + 6 * i + "] = " + temp[6 * i]);
                 temp3[1] = temp[6 * i + 1];
                 temp3[2] = temp[6 * i + 2];
                 temp3[3] = temp[6 * i + 3];

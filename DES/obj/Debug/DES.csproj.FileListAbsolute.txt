@@ -5,3 +5,4 @@ C:\Users\LEEGAYOUNG\documents\visual studio 2013\Projects\DES\DES\obj\Debug\DES.
 C:\Users\LEEGAYOUNG\documents\visual studio 2013\Projects\DES\DES\obj\Debug\DES.csproj.GenerateResource.Cache
 C:\Users\LEEGAYOUNG\documents\visual studio 2013\Projects\DES\DES\obj\Debug\DES.exe
 C:\Users\LEEGAYOUNG\documents\visual studio 2013\Projects\DES\DES\obj\Debug\DES.pdb
+C:\Users\LEEGAYOUNG\documents\visual studio 2013\Projects\DES\DES\obj\Debug\DES.csprojResolveAssemblyReference.cache
