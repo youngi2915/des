@@ -31,41 +31,45 @@ namespace DES
             {
                 //먼저 평문 textBox 내용을 가져와 파일에 저장
                 FileStream Input_file = new FileStream("plaintext", FileMode.Create, FileAccess.Write);
-                //byte[] data = new byte[textBox1.Text.Length];
-                //data = Encoding.Default.GetBytes(textBox1.Text);
-                //data = Encoding.Unicode.GetBytes(textBox1.Text);
                 byte[] data = Encoding.Unicode.GetBytes(textBox1.Text);
-                //Debug.WriteLine(data.Length);
                 Input_file.Seek(0, SeekOrigin.Begin);
                 Input_file.Write(data, 0, data.Length);
                 Input_file.Close();
 
-                //BitArray bits_temp = new BitArray(data);
-                //bits_temp.CopyTo(data, 0);
-                //textBox4.Text = Encoding.Unicode.GetString(data);
-                
-
-                //for(int i=0; i < data.Length; i++)
-                //{
-                //    Debug.Write(data[i].ToString() + " // " );
-                //}
-
-                byte[] Key;
-
+                byte[] Key = new byte[8];
 
                 if(string.IsNullOrWhiteSpace(textBox2.Text))    //Key가 입력되지 않음
                 {
+                    //
                     return;
                 }
 
                 else
-                {
-                    
-                    Key = Encoding.Unicode.GetBytes(textBox2.Text);
+                {   
+                    byte[] tmp = Encoding.Unicode.GetBytes(textBox2.Text);
+
+                    //if (tmp.Length < 8)
+                    //{
+                    //    for(int i=0; i<tmp.Length; i++)
+                    //    {
+                    //        Key[i] = tmp[i];
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    for (int i = 0; i < 8; i++)
+                    //    {
+                    //        Key[i] = tmp[i];
+                    //    }
+                    //}
+
+                    for(int i=0; i<8 && i<tmp.Length; i++)
+                    {
+                        Key[i] = tmp[i];
+                    }
                 }
 
                 //암호화
-                //Debug.WriteLine("암호화 진행");
                 DES des = new DES();
                 des.Set_If_Encryption(true);
                 des.Encryption(Key);
@@ -76,23 +80,12 @@ namespace DES
                 Output_file.Read(data2, 0, (int)Output_file.Length);
                 Output_file.Close();
                 textBox3.Text = Encoding.Unicode.GetString(data2);
-
-                //for (int i = 0; i < data2.Length; i++)
-                //{
-                //    Debug.Write(data2[i].ToString() + " // ");
-                //}
             }
         }
 
         //복호화 버튼 이벤트 핸들러
         private void button2_Click(object sender, EventArgs e)
         {
-            //if (string.IsNullOrWhiteSpace(textBox3.Text))  //복호화할게없다
-            //{
-            //    Debug.WriteLine("복호화할게없어");
-            //    return;
-            //}
-
             DES des = new DES();
             des.Set_If_Encryption(false);
             des.Decryption();
@@ -102,11 +95,6 @@ namespace DES
             Output_file.Read(data, 0, (int)Output_file.Length);
             Output_file.Close();
             textBox4.Text = Encoding.Unicode.GetString(data);
-
-            //for (int i = 0; i < data.Length; i++)
-            //{
-            //    Debug.Write(data[i].ToString() + " // ");
-            //}
         }
     }
 
@@ -126,10 +114,22 @@ namespace DES
         private int round_count;
         private bool if_encryption;
 
+        private static bool encoded;
+
         public DES()
         {
             for (int i = 0; i < 16; i++)
                 Keys[i] = new byte[6];
+        }
+
+        public void Set_encoded(bool input)
+        {
+            encoded = input;
+        }
+
+        public bool Get_encoded()
+        {
+            return encoded;
         }
 
         public void Set_If_Encryption(bool input)
@@ -150,15 +150,8 @@ namespace DES
 
             Debug.WriteLine(Input.Length);
 
-            //for (int i = 0; i < data.Length; i++)
-            //{
-            //    Debug.Write(data[i].ToString() + " /// ");
-            //}
-
             //8바이트씩(64bit씩) 몇번 반복해야 하는가
             int how_long = ((int)Input.Length) / 8;
-
-            //Debug.WriteLine(how_long);
 
             //암호화 한 결과 txt를 저장할 파일 스트림
             FileStream Output = new FileStream("ciphertext", FileMode.Create, FileAccess.Write);
@@ -169,14 +162,6 @@ namespace DES
             for (int i = 0; i <= how_long; i++)
             {
                 byte_8 = new byte[8];
-
-                //Debug.WriteLine(byte_8[1]);
-                //Debug.WriteLine(byte_8[2]);
-                //Debug.WriteLine(byte_8[3]);
-                //Debug.WriteLine(byte_8[4]);
-                //Debug.WriteLine(byte_8[5]);
-                //Debug.WriteLine(byte_8[6]);
-                //Debug.WriteLine(byte_8[7]);
 
                 if (i == how_long)
                 {
@@ -209,15 +194,6 @@ namespace DES
                     byte_8[7] = data[8 * i + 7];
                 }
 
-                //Debug.WriteLine("byte_8.Length = " + byte_8.Length);
-
-                //for (int m = 0; m < byte_8.Length; m++)
-                //{
-                //    Debug.Write(byte_8[m].ToString() + " ///// ");
-                //}
-                //Debug.WriteLine("");
-
-                //Debug.WriteLine("8byte출력 " + i + "번째 : " + byte_8[1]);
                 BitArray bits_64 = new BitArray(byte_8);
 
             
@@ -225,13 +201,7 @@ namespace DES
                 //초기 치환
                 bits_64 = Parmutation(bits_64, true);
 
-                Debug.WriteLine("초기치환후 : " + bits_64.Length);
-
-                //Debug.WriteLine("초기치환후");
-                //for (int l = 0; l < bits_64.Length; l++)
-                //{
-                //    Debug.Write(bits_64[l].ToString() + " // ");
-                //}
+                //Debug.WriteLine("초기치환후 : " + bits_64.Length);
 
                 //Round 1~16
                 round_count = 0;
@@ -242,38 +212,21 @@ namespace DES
                     round_count++;
                 }
 
-                Debug.WriteLine("Round 후 : " + bits_64.Length);
-
-                //Debug.WriteLine("\nround후 여기가 문제군");
-                //for (int l = 0; l < bits_64.Length; l++)
-                //{
-                //    Debug.Write(bits_64[l].ToString() + " // ");
-                //}
+                //Debug.WriteLine("Round 후 : " + bits_64.Length);
 
                 //최종 치환
                 bits_64 = Parmutation(bits_64, false);
 
-                Debug.WriteLine("최종치환후 : " + bits_64.Length);
+                //Debug.WriteLine("최종치환후 : " + bits_64.Length);
 
                 //파일에 씀
-                //Debug.WriteLine("bits_64.Legnth = " + bits_64.Length);
                 bits_64.CopyTo(byte_8, 0);
 
-                Debug.WriteLine("바이트변환 : " + byte_8.Length);
-
-                //for (int l = 0; l < byte_8.Length; l++)
-                //{
-                //    Debug.Write(byte_8[l].ToString() + " // ");
-                //}
-
-                //for (int l = 0; l < bits_64.Length; l++)
-                //{
-                //    Debug.Write(bits_64[l].ToString() + " // ");
-                //}
+                //Debug.WriteLine("바이트변환 : " + byte_8.Length);
 
                 Output.Write(byte_8, 0, byte_8.Length);
-                Debug.WriteLine("여기옴");
-                Debug.WriteLine("Output.Length=" + Output.Length);
+                //Debug.WriteLine("여기옴");
+                //Debug.WriteLine("Output.Length=" + Output.Length);
             }
 
             Input.Close();
@@ -284,6 +237,8 @@ namespace DES
 
         public void Decryption()
         {
+
+            Debug.WriteLine("///////////////////");
             //입력파일 열어서 읽기
             FileStream Input = new FileStream("ciphertext", FileMode.Open, FileAccess.Read);
             byte[] data = new byte[Input.Length];
@@ -303,14 +258,6 @@ namespace DES
             for (int i = 0; i <= how_long; i++)
             {
                 byte_8 = new byte[8];
-
-                //Debug.WriteLine(byte_8[1]);
-                //Debug.WriteLine(byte_8[2]);
-                //Debug.WriteLine(byte_8[3]);
-                //Debug.WriteLine(byte_8[4]);
-                //Debug.WriteLine(byte_8[5]);
-                //Debug.WriteLine(byte_8[6]);
-                //Debug.WriteLine(byte_8[7]);
 
                 if (i == how_long)
                 {
@@ -381,6 +328,12 @@ namespace DES
 
             //Debug.WriteLine("input_64.Length = " + input_64.Length);
 
+            //for (int k = 0; k < Key_Input.Length; k++)
+            //{
+            //    Debug.Write(Key_Input[k].ToString() + " /// ");
+            //}
+            //Debug.WriteLine("");
+
             //parity drop
             for (int i = 0; i < 56; i++ )
             {
@@ -391,16 +344,39 @@ namespace DES
                // after_parity_drop_56[i]
             }
 
+            //for (int k = 0; k < after_parity_drop_56.Length; k++)
+            //{
+            //    Debug.Write(after_parity_drop_56[k].ToString() + " /// ");
+            //}
+            //Debug.WriteLine("");
+
             BitArray Left = new BitArray(28, false);
             BitArray Right = new BitArray(28, false);
             BitArray after_compress = new BitArray(48, false);
 
+            for (int i = 0; i < 28; i++)
+            {
+                Left[i] = after_parity_drop_56[i];
+                Right[i] = after_parity_drop_56[i + 28];
+            }
+
+            //for (int k = 0; k < Left.Length; k++)
+            //{
+            //    Debug.Write(Left[k].ToString() + " /// ");
+            //}
+            //Debug.WriteLine("");
+            //for (int k = 0; k < Right.Length; k++)
+            //{
+            //    Debug.Write(Right[k].ToString() + " /// ");
+            //}
+            //Debug.WriteLine("");
+
             //16번의 Key 생성
-            for (int i = 0; i < 16; i++ )
+            for (int i = 0; i < 16; i++)
             {
                 //Shift Left rotate
                 int shift_left = Key_generate_shift[i];
-                BitArray temp = new BitArray(shift_left*2, false);
+                BitArray temp = new BitArray(shift_left * 2, false);
 
                 if (shift_left == 1)
                 {
@@ -417,7 +393,7 @@ namespace DES
 
                 for (int j = 0; j < (28 - shift_left); j++)
                 {
-                  
+
                     Left[j] = Left[j + shift_left];
                     Right[j] = Right[j + shift_left];
                 }
@@ -435,12 +411,23 @@ namespace DES
                     Right[27] = temp[3];
                 }
 
+                //for (int k = 0; k < Left.Length; k++)
+                //{
+                //    Debug.Write(Left[k].ToString() + " /// ");
+                //}
+                //Debug.WriteLine("");
+                //for (int k = 0; k < Right.Length; k++)
+                //{
+                //    Debug.Write(Right[k].ToString() + " /// ");
+                //}
+                //Debug.WriteLine("");
+
                 //Compress P_Box
                 for (int j = 0; j < 16; j++)
                 {
                     before = Key_compression[j];
 
-                    if(before < 28)
+                    if (before < 28)
                     {
                         after_compress.Set(j, Left.Get(before - 1));
                     }
@@ -450,6 +437,12 @@ namespace DES
                     }
 
                     after_compress.CopyTo(Keys[j], 0);      // 키 배열에 저장!
+
+                    //for (int k = 0; k < after_compress.Length; k++)
+                    //{
+                    //    Debug.Write(after_compress[k].ToString() + " /// ");
+                    //}
+                    //Debug.WriteLine("");
                 }
             }
 
@@ -492,13 +485,6 @@ namespace DES
             BitArray right = new BitArray(32, false);
             BitArray result = new BitArray(64, false);
 
-
-            //Debug.WriteLine("\n라운드 입력"+round_count);
-            //for (int l = 0; l < input.Length; l++)
-            //{
-            //    Debug.Write(input[l].ToString() + " // ");
-            //}
-
             //Mixer
             //Left32, Right32
             for (int i = 0; i < 32; i++ )
@@ -531,12 +517,6 @@ namespace DES
                 }
             }
 
-            //Debug.WriteLine("\n라운드 출력" + round_count);
-            //for (int l = 0; l < result.Length; l++)
-            //{
-            //    Debug.Write(result[l].ToString() + " // ");
-            //}
-
             return result;
         }
 
@@ -556,6 +536,13 @@ namespace DES
             else
                 key = new BitArray(Keys[15 - round_count]);
 
+
+            for (int k = 0; k < key.Length; k++)
+            {
+                Debug.Write(key[k].ToString() + " /// ");
+            }
+            Debug.WriteLine("");
+    
             //Expansion_P_Box (32 -> 48 bits)
             for (int i = 0; i < 48; i++)
             {
@@ -565,11 +552,6 @@ namespace DES
 
             //Xor with 48bits key
             temp = temp.Xor(key);
-
-            //for (int i = 0; i < 48; i++ )
-            //{
-            //    Debug.WriteLine(temp[i]);
-            //}
 
             //S_Boxs (48bits to 32bits)
             for (int i = 0; i < 8; i++ )
