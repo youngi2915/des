@@ -43,6 +43,7 @@ namespace DES
                 Input_file.Write(data, 0, data.Length);
                 Input_file.Close();
 
+                //8byte씩 나누어 암호화를 진행한다.
                 byte[] Key = new byte[8];
 
                 if(string.IsNullOrWhiteSpace(textBox2.Text))    //Key가 입력되지 않음
@@ -55,6 +56,7 @@ namespace DES
                 {   
                     byte[] tmp = Encoding.Unicode.GetBytes(textBox2.Text);
 
+                    //Key로 입력받은 문자열 길이 조절
                     for(int i=0; i<8 && i<tmp.Length; i++)
                     {
                         Key[i] = tmp[i];
@@ -63,9 +65,10 @@ namespace DES
 
                 //암호화
                 DES des = new DES();
-                des.Set_If_Encryption(true);
+                des.Set_If_Encryption(true);    //암호화, 복호화 중 암호화
                 des.Encryption(Key);
 
+                
                 //Key출력
                 FileStream generated_key = new FileStream("Keys", FileMode.Open, FileAccess.Read);
                 byte[] key_data = new byte[6];
@@ -80,6 +83,7 @@ namespace DES
                 textBox5.Text = string.Format("{0:x2}", hex[0]) + string.Format("{0:x2}", hex[1]) + string.Format("{0:x2}", hex[2]) + string.Format("{0:x2}", hex[3]) + string.Format("{0:x2}", hex[4]) + string.Format("{0:x2}", hex[5]) + string.Format("{0:x2}", hex[6]) + string.Format("{0:x2}", hex[7]) + string.Format("{0:x2}", hex[8]) + string.Format("{0:x2}", hex[9]) + string.Format("{0:x2}", hex[10]) + string.Format("{0:x2}", hex[11]) + string.Format("{0:x2}", hex[12]) + string.Format("{0:x2}", hex[13]) + string.Format("{0:x2}", hex[14]) + string.Format("{0:x2}", hex[15]);
 
                 generated_key.Close();
+
 
                 //암호문을 파일에서 읽어와 암호문 textBox에 출력
                 FileStream Output_file = new FileStream("ciphertext", FileMode.Open, FileAccess.Read);
@@ -133,8 +137,8 @@ namespace DES
             textBox3.Text = null;
             textBox4.Text = null;
             textBox5.Text = null;
-            //textBox6.Text = null;
-            //textBox7.Text = null;
+            textBox6.Text = null;
+            textBox7.Text = null;
 
             MessageBox.Show("초기화 되었습니다.");
             return;
@@ -154,13 +158,13 @@ namespace DES
 
         private static byte[][] Keys=new byte[16][];
 
-        private int round_count;
-        private bool if_encryption;
+        private int round_count;        //현재 round
+        private bool if_encryption;     //암호화인가 복호화인가
 
-        private static bool encoded;
-        private static bool decoded;
+        private static bool encoded;    //암호화 진행 여부
+        private static bool decoded;    //복호화 진행 여부
 
-        private static void Key_arrays()
+        private static void Key_arrays()    //생성된 Key들의 배열. 복호화 때도 남아있어야 하므로 static
         {
             for (int i = 0; i < 16; i++)
             {
@@ -209,7 +213,7 @@ namespace DES
             //8바이트씩(64bit씩) 몇번 반복해야 하는가
             int how_long = ((int)Input.Length) / 8;
 
-            //암호화 한 결과 txt를 저장할 파일 스트림
+            //암호화 한 결과를 저장할 파일 스트림
             FileStream Output = new FileStream("ciphertext", FileMode.Create, FileAccess.Write);
             Output.Seek(0, SeekOrigin.Begin);
             
@@ -275,11 +279,8 @@ namespace DES
 
                 //파일에 씀
                 bits_64.CopyTo(byte_8, 0);
-
                 //Debug.WriteLine("바이트변환 : " + byte_8.Length);
-
                 Output.Write(byte_8, 0, byte_8.Length);
-                //Debug.WriteLine("여기옴");
                 //Debug.WriteLine("Output.Length=" + Output.Length);
             }
 
@@ -291,8 +292,6 @@ namespace DES
 
         public void Decryption()
         {
-
-            Debug.WriteLine("///////////////////");
             //입력파일 열어서 읽기
             FileStream Input = new FileStream("ciphertext", FileMode.Open, FileAccess.Read);
             byte[] data = new byte[Input.Length];
@@ -303,7 +302,7 @@ namespace DES
 
             //Debug.WriteLine(how_long);
 
-            //암호화 한 결과 txt를 저장할 파일 스트림
+            //복호화 한 결과 txt를 저장할 파일 스트림
             FileStream Output = new FileStream("ciphertext_decryption", FileMode.Create, FileAccess.Write);
             Output.Seek(0, SeekOrigin.Begin);
 
@@ -376,13 +375,14 @@ namespace DES
 
         private void Key_Generate(byte[] Key_Input)
         {
-            BitArray input_64 = new BitArray(Key_Input);
-            BitArray after_parity_drop_56 = new BitArray(56, false);
-            int before = 0;
+            BitArray input_64 = new BitArray(Key_Input);    //byte배열을 BitArray로 바꿈
+            BitArray after_parity_drop_56 = new BitArray(56, false);    //parity drop 후 BitArray
+            int before = 0; //치환을 위한 index 변수
 
+            //Key배열을 파일에 출력할 FileStream
             FileStream key_output = new FileStream("Keys", FileMode.Create, FileAccess.Write);
 
-            Key_arrays();
+            Key_arrays();   //Key들의 배열을 생성
 
             //parity drop
             for (int i = 0; i < 56; i++ )
@@ -391,11 +391,10 @@ namespace DES
 
                 //Debug.WriteLine("i = " + i + ", (before-1) = " + (before - 1));
                 after_parity_drop_56.Set(i, input_64.Get(before - 1));
-               // after_parity_drop_56[i]
             }
 
-            BitArray Left = new BitArray(28, false);
-            BitArray Right = new BitArray(28, false);
+            BitArray Left = new BitArray(28, false);    //0~27
+            BitArray Right = new BitArray(28, false);   //28~55
             BitArray after_compress = new BitArray(48, false);
 
             for (int i = 0; i < 28; i++)
@@ -407,8 +406,8 @@ namespace DES
             //16번의 Key 생성
             for (int i = 0; i < 16; i++)
             {
-                //Shift Left rotate
-                int shift_left = Key_generate_shift[i];
+                //Left rotate
+                int shift_left = Key_generate_shift[i];     //현재 round에서 Rotate해야 할 비트 수
                 BitArray temp = new BitArray(shift_left * 2, false);
 
                 if (shift_left == 1)
@@ -461,14 +460,13 @@ namespace DES
                     } 
                 }
                 after_compress.CopyTo(Keys[i], 0);      // 키 배열에 저장!
-                key_output.Write(Keys[i], 0, Keys[i].Length);
+                key_output.Write(Keys[i], 0, Keys[i].Length);   //파일에 씀
 
-                for (int k = 0; k < after_compress.Length; k++)
-                {
-                    Debug.Write(after_compress[k].ToString() + " /// ");
-                }
-                Debug.WriteLine("");
-    
+                //for (int k = 0; k < after_compress.Length; k++)
+                //{
+                //    Debug.Write(after_compress[k].ToString() + " /// ");
+                //}
+                //Debug.WriteLine("");
             }
 
             key_output.Close();
@@ -494,12 +492,7 @@ namespace DES
             for (int i = 0; i < 64; i++ )
             {
                 before = parmu_array[i];
-                if (input.Get(before - 1))
-                {
-                    //input의 before-1 인덱스 비트 값을 i인덱스로
-                    result.Set(i, true);
-                }
-                else continue;  //0일필요는 바꿔줄 필요가 없음
+                result.Set(i, input.Get(before - 1));
             }
 
             return result;
@@ -523,8 +516,6 @@ namespace DES
 
             left = right.Xor(left);
 
-            //if (round_count == 15) return result;
-
             //Swapper
             if (round_count == 15)
             {
@@ -542,7 +533,6 @@ namespace DES
                     result[i + 32] = left[i];
                 }
             }
-
             return result;
         }
 
@@ -558,10 +548,15 @@ namespace DES
             int before;
 
             if (if_encryption == true)
+            {
                 key = new BitArray(Keys[round_count]);
+                Debug.WriteLine("key[" + round_count + "]");
+            }
             else
+            {
                 key = new BitArray(Keys[15 - round_count]);
-
+                Debug.WriteLine("key[" + (15 - round_count) + "]");
+            }
 
             //for (int k = 0; k < key.Length; k++)
             //{
@@ -584,7 +579,7 @@ namespace DES
             {
                 //Debug.WriteLine("temp3[0] = " + temp3[0] + ", temp[" + 6 * i + "] = " + temp[6 * i]);
                 temp3[0] = temp[6 * i];
-                //Debug.WriteLine("temp3[0] = " + temp3[0] + ", temp[" + 6 * i + "] = " + temp[6 * i]);
+                 //Debug.WriteLine("temp3[0] = " + temp3[0] + ", temp[" + 6 * i + "] = " + temp[6 * i]);
                 temp3[1] = temp[6 * i + 1];
                 temp3[2] = temp[6 * i + 2];
                 temp3[3] = temp[6 * i + 3];
@@ -629,9 +624,103 @@ namespace DES
             temp.CopyTo(column, 0);
             value = S_Box[row, column[0]];
 
-            BitArray result = new BitArray(BitConverter.GetBytes(value));
+            BitArray result = new BitArray(4, false);
 
-            return temp;
+            //Debug.WriteLine("\nRount : " + (round_count+1) + ", " + value);
+            if (value >= 8)
+            {
+                result.Set(0, true);
+                value -= 8;
+                if (value >= 4)
+                {
+                    result.Set(1, true);
+                    value -= 4;
+                    if (value >= 2)
+                    {
+                        result.Set(2, true);
+                        value -= 2;
+                        if (value >= 1)
+                        {
+                            result.Set(3, true);
+                        }
+                    }
+                    else
+                    {
+                        if (value >= 1)
+                        {
+                            result.Set(3, true);
+                        }
+                    }
+                }
+                else
+                {
+                    if (value >= 2)
+                    {
+                        result.Set(2, true);
+                        value -= 2;
+                        if (value >= 1)
+                        {
+                            result.Set(3, true);
+                        }
+                    }
+                    else
+                    {
+                        if (value >= 1)
+                        {
+                            result.Set(3, true);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (value >= 4)
+                {
+                    result.Set(1, true);
+                    value -= 4;
+                    if (value >= 2)
+                    {
+                        result.Set(2, true);
+                        value -= 2;
+                        if (value >= 1)
+                        {
+                            result.Set(3, true);
+                        }
+                    }
+                    else
+                    {
+                        if (value >= 1)
+                        {
+                            result.Set(3, true);
+                        }
+                    }
+                }
+                else
+                {
+                    if (value >= 2)
+                    {
+                        result.Set(2, true);
+                        value -= 2;
+                        if (value >= 1)
+                        {
+                            result.Set(3, true);
+                        }
+                    }
+                    else
+                    {
+                        if (value >= 1)
+                            result.Set(3, true);
+                    }
+                }
+            }
+
+            //for (int k = 0; k < result.Length; k++)
+            //{
+            //    Debug.Write(result[k].ToString() + " /// ");
+            //}
+            //Debug.WriteLine("");
+
+            return result;
         }
     } 
 }
