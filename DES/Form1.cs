@@ -80,7 +80,7 @@ namespace DES
                     hex[i] = (BitConverter.ToString(key_data) + Environment.NewLine);
                 }
 
-                textBox5.Text = string.Format("{0:x2}", hex[0]) + string.Format("{0:x2}", hex[1]) + string.Format("{0:x2}", hex[2]) + string.Format("{0:x2}", hex[3]) + string.Format("{0:x2}", hex[4]) + string.Format("{0:x2}", hex[5]) + string.Format("{0:x2}", hex[6]) + string.Format("{0:x2}", hex[7]) + string.Format("{0:x2}", hex[8]) + string.Format("{0:x2}", hex[9]) + string.Format("{0:x2}", hex[10]) + string.Format("{0:x2}", hex[11]) + string.Format("{0:x2}", hex[12]) + string.Format("{0:x2}", hex[13]) + string.Format("{0:x2}", hex[14]) + string.Format("{0:x2}", hex[15]);
+                textBox5.Text = string.Format("{0:x4}", hex[0]) + string.Format("{0:x4}", hex[1]) + string.Format("{0:x4}", hex[2]) + string.Format("{0:x4}", hex[3]) + string.Format("{0:x4}", hex[4]) + string.Format("{0:x4}", hex[5]) + string.Format("{0:x4}", hex[6]) + string.Format("{0:x4}", hex[7]) + string.Format("{0:x4}", hex[8]) + string.Format("{0:x4}", hex[9]) + string.Format("{0:x4}", hex[10]) + string.Format("{0:x4}", hex[11]) + string.Format("{0:x4}", hex[12]) + string.Format("{0:x4}", hex[13]) + string.Format("{0:x4}", hex[14]) + string.Format("{0:x4}", hex[15]);
 
                 generated_key.Close();
 
@@ -91,6 +91,29 @@ namespace DES
                 Output_file.Read(data2, 0, (int)Output_file.Length);
                 Output_file.Close();
                 textBox3.Text = Encoding.Unicode.GetString(data2);
+
+                //암호화 중간 과정 출력
+                FileStream result_step = new FileStream("step", FileMode.Open, FileAccess.Read);
+                byte[] step = new byte[8];
+                int how_long = (int)result_step.Length / (8 * 18);
+                string[] hex2 = new string[18*how_long]; //총 18단계를 출력
+
+                for (int i = 0; i < 18 * how_long; i++)
+                {
+                    result_step.Read(step, 0, 8);
+                    hex2[i] = (BitConverter.ToString(step) + Environment.NewLine);
+                }
+
+                result_step.Close();
+
+                string base_string = null;
+                for(int i=0; i < 18 * how_long; i++)
+                {
+                    base_string = base_string + hex2[i];
+                    if (i % 18 == 17)
+                        base_string = base_string + Environment.NewLine;
+                }
+                textBox6.Text = string.Format("{0:x4}", base_string);
 
                 MessageBox.Show("암호화가 완료되었습니다.");
                 DES.Set_encoded(true);
@@ -121,6 +144,29 @@ namespace DES
             Output_file.Read(data, 0, (int)Output_file.Length);
             Output_file.Close();
             textBox4.Text = Encoding.Unicode.GetString(data);
+
+            //복호화 중간 과정 출력
+            FileStream result_step = new FileStream("step2", FileMode.Open, FileAccess.Read);
+            byte[] step = new byte[8];
+            int how_long = (int)result_step.Length / (8 * 18);
+            string[] hex2 = new string[18 * how_long]; //총 18단계를 출력
+
+            for (int i = 0; i < 18 * how_long; i++)
+            {
+                result_step.Read(step, 0, 8);
+                hex2[i] = (BitConverter.ToString(step) + Environment.NewLine);
+            }
+
+            result_step.Close();
+
+            string base_string = null;
+            for (int i = 0; i < 18 * how_long; i++)
+            {
+                base_string = base_string + hex2[i];
+                if (i % 18 == 17)
+                    base_string = base_string + Environment.NewLine;
+            }
+            textBox7.Text = string.Format("{0:x4}", base_string);
 
             MessageBox.Show("복호화가 완료되었습니다.");
             DES.Set_decoded(true);
@@ -217,6 +263,11 @@ namespace DES
             FileStream Output = new FileStream("ciphertext", FileMode.Create, FileAccess.Write);
             Output.Seek(0, SeekOrigin.Begin);
             
+            //각 단계별 결과를 저장할 파일 스트림
+            FileStream result_step = new FileStream("step", FileMode.Create, FileAccess.Write);
+            result_step.Seek(0, SeekOrigin.Begin);
+            byte[] temp = new byte[64];
+
             byte[] byte_8;
 
             for (int i = 0; i <= how_long; i++)
@@ -230,6 +281,7 @@ namespace DES
                     {
                         Input.Close();
                         Output.Close();
+                        result_step.Close();
                         return;
                         //continue;
                     }
@@ -258,6 +310,10 @@ namespace DES
 
                 //초기 치환
                 bits_64 = Parmutation(bits_64, true);
+               
+                //초기 치환 결과를 파일에 씀
+                bits_64.CopyTo(temp, 0);
+                result_step.Write(temp, 0, 8);
 
                 //Debug.WriteLine("초기치환후 : " + bits_64.Length);
 
@@ -268,12 +324,20 @@ namespace DES
                 {
                     bits_64 = Round(bits_64);
                     round_count++;
+
+                    //각 라운드 결과를 파일에 씀
+                    bits_64.CopyTo(temp, 0);
+                    result_step.Write(temp, 0, 8);
                 }
 
                 //Debug.WriteLine("Round 후 : " + bits_64.Length);
 
                 //최종 치환
                 bits_64 = Parmutation(bits_64, false);
+                
+                //최종 치환 결과를 파일에 씀
+                bits_64.CopyTo(temp, 0);
+                result_step.Write(temp, 0, 8);
 
                 //Debug.WriteLine("최종치환후 : " + bits_64.Length);
 
@@ -286,6 +350,7 @@ namespace DES
 
             Input.Close();
             Output.Close();
+            result_step.Close();
 
             return;
         }
@@ -306,6 +371,11 @@ namespace DES
             FileStream Output = new FileStream("ciphertext_decryption", FileMode.Create, FileAccess.Write);
             Output.Seek(0, SeekOrigin.Begin);
 
+            //각 단계별 결과를 저장할 파일 스트림
+            FileStream result_step = new FileStream("step2", FileMode.Create, FileAccess.Write);
+            result_step.Seek(0, SeekOrigin.Begin);
+            byte[] temp = new byte[64];
+
             byte[] byte_8;
 
             for (int i = 0; i <= how_long; i++)
@@ -319,6 +389,7 @@ namespace DES
                     {
                         Input.Close();
                         Output.Close();
+                        result_step.Close();
                         return;
                         //continue;
                     }
@@ -349,6 +420,12 @@ namespace DES
                 //초기 치환
                 bits_64 = Parmutation(bits_64, true);
 
+                //초기 치환 결과를 파일에 씀
+                bits_64.CopyTo(temp, 0);
+                result_step.Write(temp, 0, 8);
+                int count=0;
+                Debug.WriteLine(++count);
+
                 //Round 1~16
                 round_count = 0;
 
@@ -356,10 +433,22 @@ namespace DES
                 {
                     bits_64 = Round(bits_64);
                     round_count++;
+
+                    //각 라운드 결과를 파일에 씀
+                    bits_64.CopyTo(temp, 0);
+                    result_step.Write(temp, 0, 8);
+                    Debug.WriteLine(++count);
                 }
 
                 //최종 치환
                 bits_64 = Parmutation(bits_64, false);
+
+
+
+                //최종 치환 결과를 파일에 씀
+                bits_64.CopyTo(temp, 0);
+                result_step.Write(temp, 0, 8);
+                Debug.WriteLine(++count);
 
                 //파일에 씀
                 //Debug.WriteLine("bits_64.Legnth = " + bits_64.Length);
@@ -369,6 +458,7 @@ namespace DES
 
             Input.Close();
             Output.Close();
+            result_step.Close();
 
             return;
         }
