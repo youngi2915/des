@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -45,6 +47,8 @@
             this.textBox7 = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // textBox1
@@ -76,6 +80,7 @@
             this.label1.Size = new System.Drawing.Size(26, 15);
             this.label1.TabIndex = 2;
             this.label1.Text = "Key";
+            this.toolTip1.SetToolTip(this.label1, "Key로 사용 될 text를 입력해 주세요.");
             // 
             // textBox2
             // 
@@ -120,6 +125,7 @@
             this.label2.Size = new System.Drawing.Size(31, 15);
             this.label2.TabIndex = 6;
             this.label2.Text = "평문";
+            this.toolTip1.SetToolTip(this.label2, "암호화 할 text를 입력해 주세요.");
             // 
             // label3
             // 
@@ -129,6 +135,7 @@
             this.label3.Size = new System.Drawing.Size(43, 15);
             this.label3.TabIndex = 6;
             this.label3.Text = "암호문";
+            this.toolTip1.SetToolTip(this.label3, "평문을 입력한 키로 암호화 한 것입니다.");
             // 
             // label4
             // 
@@ -138,6 +145,7 @@
             this.label4.Size = new System.Drawing.Size(43, 15);
             this.label4.TabIndex = 6;
             this.label4.Text = "복호문";
+            this.toolTip1.SetToolTip(this.label4, "암호문을 다시 복호화 한 결과 입니다.");
             // 
             // button3
             // 
@@ -157,6 +165,7 @@
             this.label5.Size = new System.Drawing.Size(31, 15);
             this.label5.TabIndex = 6;
             this.label5.Text = "Keys";
+            this.toolTip1.SetToolTip(this.label5, "입력한 Key를 바탕으로 생성된 각 Round의 Key 입니다.");
             // 
             // textBox5
             // 
@@ -169,45 +178,60 @@
             // 
             // textBox6
             // 
-            this.textBox6.Location = new System.Drawing.Point(418, 39);
+            this.textBox6.Location = new System.Drawing.Point(418, 55);
             this.textBox6.Multiline = true;
             this.textBox6.Name = "textBox6";
             this.textBox6.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox6.Size = new System.Drawing.Size(191, 494);
+            this.textBox6.Size = new System.Drawing.Size(191, 478);
             this.textBox6.TabIndex = 9;
             // 
             // textBox7
             // 
-            this.textBox7.Location = new System.Drawing.Point(615, 39);
+            this.textBox7.Location = new System.Drawing.Point(615, 55);
             this.textBox7.Multiline = true;
             this.textBox7.Name = "textBox7";
             this.textBox7.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox7.Size = new System.Drawing.Size(191, 494);
+            this.textBox7.Size = new System.Drawing.Size(191, 478);
             this.textBox7.TabIndex = 10;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(563, 18);
+            this.label6.Cursor = System.Windows.Forms.Cursors.Default;
+            this.label6.Location = new System.Drawing.Point(535, 36);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(43, 15);
+            this.label6.Size = new System.Drawing.Size(71, 15);
             this.label6.TabIndex = 6;
-            this.label6.Text = "암호화";
+            this.label6.Text = "암호화 과정";
+            this.toolTip1.SetToolTip(this.label6, "8byte 씩 나누어 암호화 과정에서의 입력데이터, 초기치환결과, 16개의 Round 결과, 최종 치환 결과를 출력합니다.");
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(760, 18);
+            this.label7.Cursor = System.Windows.Forms.Cursors.Default;
+            this.label7.Location = new System.Drawing.Point(732, 36);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(43, 15);
+            this.label7.Size = new System.Drawing.Size(71, 15);
             this.label7.TabIndex = 6;
-            this.label7.Text = "복호화";
+            this.label7.Text = "복호화 과정";
+            this.toolTip1.SetToolTip(this.label7, "8byte 씩 나누어 복호화 과정에서의 입력데이터, 초기치환결과, 16개의 Round 결과, 최종 치환 결과를 출력합니다.");
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.label8.Location = new System.Drawing.Point(505, 15);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(298, 15);
+            this.label8.TabIndex = 11;
+            this.label8.Text = "글씨 위에 마우스를 올려 놓으면 도움말이 나타납니다.";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(816, 543);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.textBox7);
             this.Controls.Add(this.textBox6);
             this.Controls.Add(this.textBox5);
@@ -227,6 +251,7 @@
             this.Controls.Add(this.textBox1);
             this.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.MaximizeBox = false;
             this.Name = "Form1";
@@ -257,6 +282,8 @@
         private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
 

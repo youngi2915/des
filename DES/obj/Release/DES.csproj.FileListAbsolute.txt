@@ -1,0 +1,8 @@
+C:\Users\LEEGAYOUNG\Documents\Visual Studio 2013\Projects\DES\DES\bin\Release\DES.exe
+C:\Users\LEEGAYOUNG\Documents\Visual Studio 2013\Projects\DES\DES\bin\Release\DES.pdb
+C:\Users\LEEGAYOUNG\Documents\Visual Studio 2013\Projects\DES\DES\obj\Release\DES.csprojResolveAssemblyReference.cache
+C:\Users\LEEGAYOUNG\Documents\Visual Studio 2013\Projects\DES\DES\obj\Release\DES.Form1.resources
+C:\Users\LEEGAYOUNG\Documents\Visual Studio 2013\Projects\DES\DES\obj\Release\DES.Properties.Resources.resources
+C:\Users\LEEGAYOUNG\Documents\Visual Studio 2013\Projects\DES\DES\obj\Release\DES.csproj.GenerateResource.Cache
+C:\Users\LEEGAYOUNG\Documents\Visual Studio 2013\Projects\DES\DES\obj\Release\DES.exe
+C:\Users\LEEGAYOUNG\Documents\Visual Studio 2013\Projects\DES\DES\obj\Release\DES.pdb
